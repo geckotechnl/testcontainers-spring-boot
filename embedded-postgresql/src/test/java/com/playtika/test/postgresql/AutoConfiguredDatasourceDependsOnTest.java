@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -57,6 +58,9 @@ class AutoConfiguredDatasourceDependsOnTest {
         @Autowired
         protected JdbcTemplate jdbcTemplate;
 
+        @Value("${embedded.postgresql.auto-config-datasource-enabled:true}")
+        private Boolean autoConfigDatasourceEnabled;
+
         @Test
         void shouldConnectToPostgreSQL() {
             assertThat(jdbcTemplate.queryForObject("select version()", String.class)).contains("PostgreSQL");
@@ -69,7 +73,13 @@ class AutoConfiguredDatasourceDependsOnTest {
                     .as("Auto-configured datasource should be present")
                     .hasSize(1)
                     .contains("dataSource");
-            asList(beanNamesForType).forEach(this::hasDependsOn);
+
+            Boolean prop = autoConfigDatasourceEnabled;
+            if(prop == null || !prop) {
+                asList(beanNamesForType).forEach(this::hasNoDependsOn);
+            } else {
+                asList(beanNamesForType).forEach(this::hasDependsOn);
+            }
         }
 
         private void hasDependsOn(String beanName) {
@@ -77,6 +87,10 @@ class AutoConfiguredDatasourceDependsOnTest {
                     .isNotNull()
                     .isNotEmpty()
                     .contains(BEAN_NAME_EMBEDDED_POSTGRESQL);
+        }
+
+        private void hasNoDependsOn(String beanName) {
+            assertThat(beanFactory.getBeanDefinition(beanName).getDependsOn()).isNull();
         }
     }
 
@@ -102,6 +116,24 @@ class AutoConfiguredDatasourceDependsOnTest {
     @Nested
     @DisplayName("AutoConfigured Datasource with timescaledb:latest-pg11")
     class Timescale12Image extends TestDefaults {
+    }
+
+    @TestPropertySource(properties = {
+            "embedded.postgresql.docker-image=postgres:11-alpine",
+            "embedded.postgresql.auto-config-datasource-enabled=false"
+    })
+    @Nested
+    @DisplayName("AutoConfigured Datasource with postgres:11-alpine with auto configure datasource DISABLED")
+    class Alpine11ImageWithAutoConfigDisabled extends TestDefaults {
+    }
+
+    @TestPropertySource(properties = {
+            "embedded.postgresql.docker-image=postgres:11-alpine",
+            "embedded.postgresql.auto-config-datasource-enabled=true"
+    })
+    @Nested
+    @DisplayName("AutoConfigured Datasource with postgres:11-alpine with auto configure datasource ENABLED")
+    class Alpine11ImageWithAutoConfigEnabled extends TestDefaults {
     }
 }
 
