@@ -40,7 +40,7 @@ import static com.playtika.test.postgresql.PostgreSQLProperties.BEAN_NAME_EMBEDD
 @Configuration
 @AutoConfigureOrder
 @ConditionalOnClass(DataSource.class)
-@ConditionalOnProperty(name = "embedded.postgresql.enabled", matchIfMissing = true)
+@ConditionalOnProperty(name = {"embedded.postgresql.enabled", "embedded.postgresql.auto-config-datasource-enabled"}, matchIfMissing = true, havingValue = "true")
 @AutoConfigureAfter(name = "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration")
 public class EmbeddedPostgreSQLDependenciesAutoConfiguration {
 

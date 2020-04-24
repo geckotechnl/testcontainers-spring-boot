@@ -8,6 +8,11 @@
       "defaultValue": "true"
     },
     {
+      "name": "embedded.postgresql.auto-config-datasource-enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": "true"
+    },
+    {
       "name": "embedded.postgresql.docker-image",
       "type": "java.lang.String",
       "defaultValue": "postgres:10-alpine"
@@ -24,6 +29,19 @@
         {
           "value": "false",
           "description": "Disables configuration of postgresql server on startup."
+        }
+      ]
+    },
+    {
+      "name": "embedded.postgresql.auto-config-datasource-enabled",
+      "values": [
+        {
+          "value": "true",
+          "description": "Enables auto configuration of datasource with the datasource having a dependency on the postgresql container."
+        },
+        {
+          "value": "false",
+          "description": "Disables auto configuration of datasource with the datasource having a dependency on the postgresql container."
         }
       ]
     },
